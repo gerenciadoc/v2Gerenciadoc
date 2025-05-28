@@ -1,0 +1,307 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========== MODELOS DE AUTENTICAÇÃO ==========
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relacionamentos NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // Relacionamentos da aplicação
+  empresas     EmpresaUser[]
+  documentos   Documento[]
+  licitacoes   LicitacaoUser[]
+  atividades   AtividadeLog[]
+  notificacoes Notificacao[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+// ========== ENUMS ==========
+
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
+}
+
+enum DocumentoStatus {
+  VALID
+  EXPIRING
+  EXPIRED
+  PENDING
+  REJECTED
+}
+
+enum DocumentoTipo {
+  FISCAL
+  TRABALHISTA
+  TECNICA
+  QUALIFICACAO
+  HABILITACAO_JURIDICA
+  EDITAL
+  OUTROS
+}
+
+enum LicitacaoStatus {
+  RASCUNHO
+  AGUARDANDO_ABERTURA
+  ABERTA
+  EM_ANALISE
+  FINALIZADA
+  CANCELADA
+}
+
+enum LicitacaoTipo {
+  PREGAO_ELETRONICO
+  PREGAO_PRESENCIAL
+  TOMADA_PRECOS
+  CONVITE
+  CONCORRENCIA
+  OUTROS
+}
+
+enum AtividadeTipo {
+  DOCUMENTO_CRIADO
+  DOCUMENTO_EDITADO
+  DOCUMENTO_REMOVIDO
+  LICITACAO_CRIADA
+  LICITACAO_EDITADA
+  USUARIO_LOGOU
+  ARQUIVO_ENVIADO
+}
+
+// ========== MODELOS PRINCIPAIS ==========
+
+model Empresa {
+  id          String   @id @default(cuid())
+  razaoSocial String
+  nomeFantasia String?
+  cnpj        String   @unique
+  email       String?
+  telefone    String?
+  endereco    String?
+  cidade      String?
+  estado      String?
+  cep         String?
+  ativa       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relacionamentos
+  usuarios   EmpresaUser[]
+  documentos Documento[]
+  licitacoes Licitacao[]
+
+  @@map("empresas")
+}
+
+model EmpresaUser {
+  id        String   @id @default(cuid())
+  empresaId String
+  userId    String
+  role      UserRole @default(USER)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  empresa Empresa @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([empresaId, userId])
+  @@map("empresa_users")
+}
+
+model Documento {
+  id          String          @id @default(cuid())
+  nome        String
+  tipo        DocumentoTipo
+  status      DocumentoStatus @default(PENDING)
+  arquivo     String? // URL ou caminho do arquivo
+  tamanho     Int? // Tamanho em bytes
+  mimetype    String?
+  validade    DateTime?
+  observacoes String?
+  empresaId   String
+  userId      String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relacionamentos
+  empresa             Empresa              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  user                User                 @relation(fields: [userId], references: [id])
+  licitacaoDocumentos LicitacaoDocumento[]
+  versoes             DocumentoVersao[]
+
+  @@map("documentos")
+}
+
+model DocumentoVersao {
+  id          String   @id @default(cuid())
+  documentoId String
+  versao      Int
+  arquivo     String
+  tamanho     Int?
+  observacoes String?
+  createdAt   DateTime @default(now())
+
+  documento Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@unique([documentoId, versao])
+  @@map("documento_versoes")
+}
+
+model Licitacao {
+  id             String          @id @default(cuid())
+  titulo         String
+  tipo           LicitacaoTipo
+  numero         String?
+  orgao          String
+  valorEstimado  Decimal?        @db.Decimal(15, 2)
+  dataAbertura   DateTime?
+  dataEncerramento DateTime?
+  descricao      String?         @db.Text
+  status         LicitacaoStatus @default(RASCUNHO)
+  editalUrl      String?
+  empresaId      String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  // Relacionamentos
+  empresa    Empresa              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  usuarios   LicitacaoUser[]
+  documentos LicitacaoDocumento[]
+
+  @@map("licitacoes")
+}
+
+model LicitacaoUser {
+  id          String   @id @default(cuid())
+  licitacaoId String
+  userId      String
+  role        UserRole @default(USER)
+  createdAt   DateTime @default(now())
+
+  licitacao Licitacao @relation(fields: [licitacaoId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([licitacaoId, userId])
+  @@map("licitacao_users")
+}
+
+model LicitacaoDocumento {
+  id          String   @id @default(cuid())
+  licitacaoId String
+  documentoId String
+  obrigatorio Boolean  @default(false)
+  enviado     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  licitacao Licitacao @relation(fields: [licitacaoId], references: [id], onDelete: Cascade)
+  documento Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@unique([licitacaoId, documentoId])
+  @@map("licitacao_documentos")
+}
+
+// ========== MODELOS DE AUDITORIA E LOGS ==========
+
+model AtividadeLog {
+  id          String        @id @default(cuid())
+  tipo        AtividadeTipo
+  descricao   String
+  entidadeId  String? // ID da entidade afetada (documento, licitacao, etc)
+  entidadeTipo String? // Tipo da entidade (documento, licitacao, etc)
+  userId      String
+  metadata    Json? // Dados adicionais em JSON
+  createdAt   DateTime      @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("atividade_logs")
+}
+
+model Notificacao {
+  id        String   @id @default(cuid())
+  titulo    String
+  mensagem  String
+  tipo      String // info, warning, error, success
+  lida      Boolean  @default(false)
+  userId    String
+  link      String? // Link para ação relacionada
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notificacoes")
+}
+
+// ========== CONFIGURAÇÕES ==========
+
+model Configuracao {
+  id    String @id @default(cuid())
+  chave String @unique
+  valor String
+  tipo  String @default("string") // string, number, boolean, json
+
+  @@map("configuracoes")
+}

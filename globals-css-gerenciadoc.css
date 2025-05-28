@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========== VARIÁVEIS CSS DO DESIGN SYSTEM ========== */
+
+:root {
+  /* Cores Primárias */
+  --color-primary: #0052CC;
+  --color-primary-hover: #0747A6;
+  --color-primary-active: #043584;
+
+  /* Cores Secundárias */
+  --color-success: #36B37E;
+  --color-success-hover: #2E9E6B;
+  --color-success-active: #268C5F;
+  --color-teal: #00B8D9;
+  --color-teal-hover: #00A3BF;
+  --color-teal-active: #008DA3;
+
+  /* Cores Neutras */
+  --color-white: #FFFFFF;
+  --color-gray-100: #F4F5F7;
+  --color-gray-200: #DFE1E6;
+  --color-gray-300: #C1C7D0;
+  --color-gray-400: #A5ADBA;
+  --color-gray-500: #7A869A;
+  --color-gray-600: #6B778C;
+  --color-gray-700: #505F79;
+  --color-gray-800: #42526E;
+  --color-gray-900: #253858;
+  --color-black: #091E42;
+
+  /* Cores Semânticas */
+  --color-error: #DE350B;
+  --color-error-hover: #C62F0A;
+  --color-error-active: #AE2A09;
+  --color-warning: #FFAB00;
+  --color-warning-hover: #E69900;
+  --color-warning-active: #CC8800;
+  --color-info: var(--color-primary);
+
+  /* Tipografia */
+  --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;   /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-md: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.75rem;  /* 28px */
+  --font-size-4xl: 2rem;     /* 32px */
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.3;
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* Espaçamentos */
+  --space-xxs: 0.25rem;  /* 4px */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 0.75rem;   /* 12px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-xxl: 2.5rem;   /* 40px */
+  --space-xxxl: 3rem;    /* 48px */
+  --space-xxxxl: 4rem;   /* 64px */
+
+  /* Bordas e Arredondamentos */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-width: 1px;
+  --border-width-thick: 2px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(9, 30, 66, 0.1);
+  --shadow-md: 0 3px 6px rgba(9, 30, 66, 0.15);
+  --shadow-lg: 0 8px 16px rgba(9, 30, 66, 0.2);
+
+  /* Transições */
+  --transition-fast: 0.15s ease-in-out;
+  --transition-base: 0.25s ease-in-out;
+  --transition-slow: 0.4s ease-in-out;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --header-height: 64px;
+  --content-max-width: 1200px;
+  --container-padding: var(--space-lg);
+
+  /* Shadcn/UI Variables */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  /* Dark mode variables */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 84% 4.9%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 224.3 76.3% 94.1%;
+}
+
+/* ========== BASE STYLES ========== */
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== UTILIDADES CUSTOMIZADAS ========== */
+
+/* Cores do Design System */
+.text-primary-custom { color: var(--color-primary); }
+.text-success-custom { color: var(--color-success); }
+.text-error-custom { color: var(--color-error); }
+.text-warning-custom { color: var(--color-warning); }
+.text-teal-custom { color: var(--color-teal); }
+
+.bg-primary-custom { background-color: var(--color-primary); }
+.bg-success-custom { background-color: var(--color-success); }
+.bg-error-custom { background-color: var(--color-error); }
+.bg-warning-custom { background-color: var(--color-warning); }
+.bg-teal-custom {
